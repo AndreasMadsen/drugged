@@ -1,6 +1,6 @@
 #drugged
 
-> extendable HTTP router with domain integration
+> Prototypal extendable HTTP router with domain integration
 
 ## Installation
 

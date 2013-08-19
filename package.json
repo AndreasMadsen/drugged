@@ -1,6 +1,6 @@
 {
   "name": "drugged",
-  "description": "extendable HTTP router with domain integration",
+  "description": "Prototypal extendable HTTP router with domain integration",
   "version": "0.2.0",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "main": "./drugged.js",
