@@ -38,6 +38,11 @@ router.get('/:file', function (file) {
 var drugged = require('drugged');
 ```
 
+There are two main components one is the required [`Router`](#router-constructor) and
+the other is the optional [`Handle base constructor`](#handle-constructor) that you can
+use to extend the `this` keyword. You enable this key-feature by using the
+[`router.setHandle`](#routersethandlehandle) method.
+
 ### Router constructor
 
 You create a new `router` instance by calling `drugged.Router`.
@@ -130,7 +135,7 @@ router.at('/:first/:last', function (first, last) {
 });
 ```
 
-#### Router[method](path, fn)
+#### Router\[method\]\(path, fn\)
 
 This is a simple shortcut to `router.at` where, eq. `router.get` is is a short
 cut to `router.at(path, 'get', fn)`.
