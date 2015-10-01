@@ -23,12 +23,13 @@ var server = http.createServer();
 
 // Extend the this keyword
 router.attach(function () {
-  this.prefix = 'path: ';
+  this.prefix = 'file: ';
 });
 
 // Setup a simple router
 router.get('/:file', function (file) {
-  this.res.end(this.prefix + file);
+  this.res.write(this.prefix + file + '\n');
+  this.res.end('query: ' + this.url.search);
 });
 ```
 
@@ -174,7 +175,7 @@ user authorization. When you are done you must call the `callback`
 
 ```javascript
 function Handle(callback) {
-  // Sets `.req`, `.res` and `.domain`
+  // Sets `.url`, `.req`, `.res` and `.domain`
   drugged.Hanlde.apply(this, arguments);
 
   // Do async or sync stuff
@@ -221,6 +222,11 @@ The native server request object, see node.js
 
 The native server response object, see node.js
 [documentation](http://nodejs.org/api/http.html#http_class_http_serverresponse).
+
+#### Handle.url
+
+The `url.parse` result, but without `parseQueryString` enabled, see node.js
+[documentation](http://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost).
 
 #### Handle.domain
 

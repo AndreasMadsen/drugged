@@ -1,3 +1,4 @@
+'use strict';
 
 var url = require('url');
 var util = require('util');
@@ -40,12 +41,14 @@ test('no matching route return 404', function (t) {
 test('adding a simple GET router via .get', function (t) {
   workingRouter.get('/', function () {
     this.res.setHeader('X-Handler', 'GET');
+    this.res.setHeader('X-Query', this.url.query);
     this.res.end('Root GET');
   });
 
   request('http://127.0.0.1:10010', 'GET', function (err, res, body) {
     t.equal(err, null);
     t.equal(res.headers['x-handler'], 'GET');
+    t.equal(res.headers['x-query'], 'null');
     t.equal(res.statusCode, 200);
     t.equal(body, 'Root GET');
     t.end();
@@ -56,6 +59,18 @@ test('GET routes handles HEAD requests too', function (t) {
   request('http://127.0.0.1:10010', 'HEAD', function (err, res, body) {
     t.equal(err, null);
     t.equal(res.headers['x-handler'], 'GET');
+    t.equal(res.headers['x-query'], 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, '');
+    t.end();
+  });
+});
+
+test('All routes ignores query parameters', function (t) {
+  request('http://127.0.0.1:10010/?query=string', 'HEAD', function (err, res, body) {
+    t.equal(err, null);
+    t.equal(res.headers['x-handler'], 'GET');
+    t.equal(res.headers['x-query'], 'query=string');
     t.equal(res.statusCode, 200);
     t.equal(body, '');
     t.end();

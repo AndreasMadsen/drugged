@@ -1,14 +1,17 @@
+'use strict';
 
+var url = require('url');
 var Routes = require('routes');
 var domain = require('domain');
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // Supper simple request container
-function Handle(done, req, res, d) {
+function Handle(done, req, res, parsedUrl, d) {
   var self = this;
-  this.req = req;
   this.res = res;
+  this.req = req;
+  this.url = parsedUrl;
 
   // Setup domain
   this.domain = d;
@@ -148,14 +151,15 @@ Router.prototype.dispatch = function (req, res) {
   var d = domain.create();
 
   d.run(function () {
-    var match = self.router.match(req.url);
+    var parsedUrl = url.parse(req.url);
+    var match = self.router.match(parsedUrl.pathname);
 
     // Create Request handle and make sure done is called in another turn
     var sync = true;
     var handle = new self.Handle(function (err) {
       if (sync) process.nextTick(done.bind(null, err));
       else done(err);
-    }, req, res, d);
+    }, req, res, parsedUrl, d);
     sync = false;
 
     function done(err) {

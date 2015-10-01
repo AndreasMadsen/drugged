@@ -1,7 +1,7 @@
 {
   "name": "drugged",
   "description": "Prototypal extendable HTTP router with domain integration",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "main": "./drugged.js",
   "scripts": {
@@ -17,10 +17,10 @@
     "dispatch"
   ],
   "dependencies": {
-    "routes": "2.0.x"
+    "routes": "2.1.x"
   },
   "devDependencies": {
-    "tap": "0.6.x",
+    "tap": "2.0.x",
     "endpoint": "0.4.x"
   },
   "license": "MIT"
