@@ -1,7 +1,7 @@
 'use strict';
 
 const url = require('url');
-const Routes = require('routes');
+const HttpHash = require('http-hash');
 const DefaultHandle = require('./handlers/default.js');
 
 // Manage diffrent method handlers on same path
@@ -21,19 +21,21 @@ HandlerCollection.prototype.add = function (method, cb) {
 };
 
 // Run the route method with the handle as this and params as arguments
-HandlerCollection.prototype.run = function (method, handle, params) {
+HandlerCollection.prototype.run = function (method, handle, params, splat) {
   // Get the route callback by the method name
   let fn = this.all ? this.methods.all : this.methods[method];
   if (!fn && method === 'HEAD') fn = this.methods.GET;
 
   if (fn) {
-    // Unpack the object to an array.
+    // Unpack the params to an array.
     // NOTE: this assumes the object key ordering is consistent
     const keys = Object.keys(params);
     const args = new Array(keys.length);
     for (let i = 0, l = keys.length; i < l; i++) {
       args[i] = params[keys[i]] === undefined ? null : params[keys[i]];
     }
+    // Add the * part too, if it was used
+    if (splat !== null) args.push(splat);
 
     fn.apply(handle, args);
   } else {
@@ -48,7 +50,7 @@ function Router(HandleConstructor) {
   if (!(this instanceof Router)) return new Router(HandleConstructor);
 
   this.Handle = DefaultHandle;
-  this.router = new Routes();
+  this.router = new HttpHash();
   this.collections = new Map();
   this.attachMethods = [];
 }
@@ -80,20 +82,19 @@ Router.prototype.at = function (path/*, method, cb */) {
     cb = arguments[2];
   }
 
-  // If path is a RegExp convert it to a string
-  const key = path.toString();
+  // Get the collection handler
   let collection;
-  // Check if the handle collection has already been created
-  if (this.collections.has(key)) {
-    collection = this.collections.get(key);
+  if (this.collections.has(path)) {
+    // If the handle collection has already been created
+    collection = this.collections.get(path);
   } else {
     // Create a handlers object if none exists
     collection = new HandlerCollection();
-    this.collections.set(key, collection);
+    this.collections.set(path, collection);
 
     // Set router path
-    this.router.addRoute(path, function (method, handle, params) {
-      collection.run(method, handle, params);
+    this.router.set(path, function (method, handle, params, splat) {
+      collection.run(method, handle, params, splat);
     });
   }
 
@@ -122,7 +123,7 @@ Router.prototype.dispatch = function (req, res) {
   const self = this;
 
   const parsedUrl = url.parse(req.url);
-  const match = self.router.match(parsedUrl.pathname);
+  const match = self.router.get(parsedUrl.pathname);
 
   // Create Request handle and make sure done is called in another turn
   let sync = true;
@@ -142,13 +143,13 @@ Router.prototype.dispatch = function (req, res) {
     }
 
     // No match found, send 404
-    if (!match) {
+    if (match.handler === null) {
       err = new Error('Not Found');
       err.statusCode = 404;
       return handle.error(err);
     }
 
     // match found, relay to HandlerCollection
-    match.fn(req.method, handle, match.params);
+    match.handler(req.method, handle, match.params, match.splat);
   }
 };

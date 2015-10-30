@@ -155,14 +155,27 @@ test('multiply router adds second item', function (t) {
 });
 
 test('colon matchers becomes arguments', function (t) {
-  workingRouter.get('/:first/:mid/:last?', function (first, mid, last) {
-    this.res.end(first + '-' + mid + '-' + last);
+  workingRouter.get('/:first/:mid', function (first, mid) {
+    this.res.end(first + '-' + mid);
   });
 
   request('http://127.0.0.1:10010/a/b', 'GET', function (err, res, body) {
     t.equal(err, null);
     t.equal(res.statusCode, 200);
-    t.equal(body, 'a-b-null');
+    t.equal(body, 'a-b');
+    t.end();
+  });
+});
+
+test('splat matchers becomes arguments', function (t) {
+  workingRouter.get('/:first/:mid/*', function (first, mid, last) {
+    this.res.end(first + '-' + mid + '-' + last);
+  });
+
+  request('http://127.0.0.1:10010/a/b/c', 'GET', function (err, res, body) {
+    t.equal(err, null);
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'a-b-c');
     t.end();
   });
 });

@@ -17,7 +17,7 @@
     "dispatch"
   ],
   "dependencies": {
-    "routes": "2.1.x"
+    "http-hash": "2.x.x"
   },
   "devDependencies": {
     "tap": "2.x.x",
