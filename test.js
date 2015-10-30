@@ -4,6 +4,7 @@ const url = require('url');
 const util = require('util');
 const http = require('http');
 const test = require('tap').test;
+const spawn = require('child_process').spawn;
 const endpoint = require('endpoint');
 const drugged = require('./drugged.js');
 
@@ -236,6 +237,39 @@ test('catch error on req object', function (t) {
     t.equal(body, 'some crazy request error');
     t.end();
   });
+});
+
+test('debug handle', function (t) {
+  const p = spawn(process.execPath, ['-e', `
+    const drugged = require('./drugged.js');
+    const http = require('http');
+
+    const router = new drugged.Router();
+          router.setHandle(drugged.DebugHandle);
+
+    const server = http.createServer();
+          server.on('request', router.dispatch.bind(router));
+
+    router.get('/', function () {
+      this.error(new Error('failure'));
+    });
+
+    server.listen(0, '127.0.0.1', function () {
+      http.get('http://localhost:' + server.address().port, function () {});
+    });
+  `], { cwd: __dirname });
+
+  p.stderr.pipe(endpoint(function (err, output) {
+    t.deepEqual(output.toString().split('\n').slice(0, 5), [
+      'this.error was called:',
+      '  Status: 500',
+      '  Method: GET',
+      '  URL: /',
+      '  Error: failure'
+    ]);
+
+    t.end();
+  }));
 });
 
 test('close working server', function (t) {

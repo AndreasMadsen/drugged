@@ -1,6 +1,6 @@
 #drugged
 
-> Prototypal extendable HTTP router with domain integration
+> Prototypal extendable HTTP router
 
 ## Installation
 
@@ -167,6 +167,10 @@ information about the custom and default `Handle` constructor see below.
 router.setHandle(Handle);
 ```
 
+The default handler is `drugged.DefaultHandle`, but there is also a predefined
+`drugged.DebugHandle` that you can use. This has a special error handler
+that will print the error and then stop the process.
+
 ### Handle constructor
 
 You create a `Handle` constructor by extending the `drugged.DefaultHandle` constructor
@@ -175,7 +179,7 @@ user authorization. When you are done you must call the `callback`
 
 ```javascript
 function Handle(callback) {
-  // Sets `.url`, `.req`, `.res` and `.domain`
+  // Sets `.url`, `.req`, `.res`
   drugged.DefaultHandle.apply(this, arguments);
 
   // Do async or sync stuff
@@ -197,10 +201,6 @@ DefaultHandle.prototype.error = function (err) {
   var self = this;
   this.res.statusCode = err.statusCode || 500;
   this.res.end(err.message);
-
-  this.res.once('close', function () {
-    self.domain.dispose();
-  });
 };
 ```
 

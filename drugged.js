@@ -2,6 +2,7 @@
 
 const url = require('url');
 const HttpHash = require('http-hash');
+const DebugHandle = require('./handlers/debug.js');
 const DefaultHandle = require('./handlers/default.js');
 
 // Manage diffrent method handlers on same path
@@ -55,6 +56,7 @@ function Router(HandleConstructor) {
   this.attachMethods = [];
 }
 exports.Router = Router;
+exports.DebugHandle = DebugHandle;
 exports.DefaultHandle = DefaultHandle;
 
 Router.prototype.setHandle = function (HandleConstructor) {
