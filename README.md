@@ -80,9 +80,9 @@ router.attach(function () {
 
 To create a route handler you should call `Rotuer.at`.
 
-The `path` argument can either be a `String` or a `RegExp`, see the `routes`
-module [documentation](https://github.com/aaronblohowiak/routes.js#path-formats)
-for more information on the syntax.
+The `path` is a string, see the `http-hash` module
+[documentation](https://github.com/Matt-Esch/http-hash#path-formats) for
+more information on the syntax.
 
 The `method` argument is optional, if not set the `fn` will handle all methods,
 thats useful if you have some other module there takes care of everything.
@@ -94,7 +94,7 @@ router.at('/', function () {
 });
 ```
 
-otherwice the `method` can be any `HTTP` method that node.js supports:
+otherwise the `method` can be any `HTTP` method that node.js supports:
 
 ```javascript
 router.at('/', 'POST', function () {
@@ -111,10 +111,10 @@ router.at('/', 'GET', function () {
   //  won't write anything.
 });
 
-// Please note that the POST route stil works
+// Please note that the POST route still works
 ```
 
-You can also set multply routes at once useing an object:
+You can also set multiply routes at once using an object:
 
 ```javascript
 router.at('/', {
@@ -122,16 +122,16 @@ router.at('/', {
   'GET': function () { },
   'POST': function () { }
 });
-// Please note this will overwrite the previouse set GET and HEAD routes and
+// Please note this will overwrite the previous set GET and HEAD routes and
 //  because there now is a HEAD route, it won't be handled by the GET route.
 ```
 
 Each route you set will be execute with a variable amount of arguments,
-where each argument will refer to an `:colon` matchers you might have in your
-route path.
+where each argument will refer to an parameter (`:colon`) or splat (`*`) you
+might have in your route path.
 
 ```javascript
-router.at('/:first/:last', function (first, last) {
+router.at('/:first/:last/*', function (first, last, splat) {
 
 });
 ```
@@ -169,31 +169,31 @@ router.setHandle(Handle);
 
 ### Handle constructor
 
-You create a `Handle` constructor by extending the `drugged.Handle` constructor
+You create a `Handle` constructor by extending the `drugged.DefaultHandle` constructor
 function. After this you have the opportunity to do sync/async operations like
 user authorization. When you are done you must call the `callback`
 
 ```javascript
 function Handle(callback) {
   // Sets `.url`, `.req`, `.res` and `.domain`
-  drugged.Hanlde.apply(this, arguments);
+  drugged.DefaultHandle.apply(this, arguments);
 
   // Do async or sync stuff
   setTimeout(callback, 10);
 }
-util.inherits(Handle, drugged.Handle);
+util.inherits(Handle, drugged.DefaultHandle);
 ```
 
 #### Handle.error(err)
 
-This method is called when an error occur, the `drugged.Handle` class has a
+This method is called when an error occur, the `drugged.DefaultHandle` class has a
 default `error` method, but you are welcome to overwrite it.
 
 This is the default error handler and its also an example on how to overwrite
 it:
 
 ```javascript
-Handle.prototype.error = function (err) {
+DefaultHandle.prototype.error = function (err) {
   var self = this;
   this.res.statusCode = err.statusCode || 500;
   this.res.end(err.message);
@@ -207,7 +207,6 @@ Handle.prototype.error = function (err) {
 Errors can come from multiply places, depending on the origin the `err` object
 will have a different `statusCode` property value.
 
-* Catched by a domain: 500
 * No matching route was found: 404
 * A route was found but the method is unsupported: 405
 
@@ -228,35 +227,6 @@ The native server response object, see node.js
 The `url.parse` result, but without `parseQueryString` enabled, see node.js
 [documentation](http://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost).
 
-#### Handle.domain
-
-The native domain instance object, see node.js
-[documentation](http://nodejs.org/api/domain.html#domain_class_domain).
-
 ## The name
 
-I wrote this module while I was drugged, which was pretty hard :)
-
-##License
-
-**The software is license under "MIT"**
-
-> Copyright (c) 2013 Andreas Madsen
->
-> Permission is hereby granted, free of charge, to any person obtaining a copy
-> of this software and associated documentation files (the "Software"), to deal
-> in the Software without restriction, including without limitation the rights
-> to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-> copies of the Software, and to permit persons to whom the Software is
-> furnished to do so, subject to the following conditions:
->
-> The above copyright notice and this permission notice shall be included in
-> all copies or substantial portions of the Software.
->
-> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-> IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-> FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-> AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-> LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-> OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-> THE SOFTWARE.
+I wrote this module while I was medically drugged, which was pretty hard :)
