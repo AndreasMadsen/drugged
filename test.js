@@ -167,22 +167,22 @@ test('colon matchers becomes arguments', function (t) {
   });
 });
 
-function Handle(done) {
-  drugged.Handle.apply(this, arguments);
+function CustomHandle(done) {
+  drugged.DefaultHandle.apply(this, arguments);
 
   this.something(done);
 }
-util.inherits(Handle, drugged.Handle);
+util.inherits(CustomHandle, drugged.DefaultHandle);
 
-Handle.prototype.something = function (done) { done(null); };
+CustomHandle.prototype.something = function (done) { done(null); };
 
 test('setting a custom Handle', function (t) {
-  workingRouter.setHandle(Handle);
+  workingRouter.setHandle(CustomHandle);
   t.end();
 });
 
 test('using attach', function (t) {
-  Handle.prototype.something = function (done) {
+  CustomHandle.prototype.something = function (done) {
     this.custom = true;
     done(null);
   };
@@ -200,7 +200,7 @@ test('using attach', function (t) {
 });
 
 test('catch error on res object', function (t) {
-  Handle.prototype.something = function () {
+  CustomHandle.prototype.something = function () {
     this.res.emit('error', new Error('some crazy response error'));
   };
 
@@ -213,7 +213,7 @@ test('catch error on res object', function (t) {
 });
 
 test('catch error on req object', function (t) {
-  Handle.prototype.something = function () {
+  CustomHandle.prototype.something = function () {
     this.req.emit('error', new Error('some crazy request error'));
   };
 

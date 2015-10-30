@@ -2,26 +2,9 @@
 
 const url = require('url');
 const Routes = require('routes');
+const DefaultHandle = require('./handlers/default.js');
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-// Supper simple request container
-function Handle(done, req, res, parsedUrl) {
-  this.res = res;
-  this.res.once('error', this.error.bind(this));
-  this.req = req;
-  this.req.once('error', this.error.bind(this));
-  this.url = parsedUrl;
-
-  // If this is the actual constructor call done now
-  if (this.constructor === Handle) done(null);
-}
-exports.Handle = Handle;
-
-Handle.prototype.error = function (err) {
-  this.res.statusCode = err.statusCode || 500;
-  this.res.end(err.message);
-};
 
 // Manage diffrent method handlers on same path
 function HandlerCollection() {
@@ -63,12 +46,13 @@ HandlerCollection.prototype.run = function (method, handle, params) {
 function Router(HandleConstructor) {
   if (!(this instanceof Router)) return new Router(HandleConstructor);
 
-  this.Handle = Handle;
+  this.Handle = DefaultHandle;
   this.router = new Routes();
   this.collections = Object.create(null);
   this.attachstack = [];
 }
 exports.Router = Router;
+exports.DefaultHandle = DefaultHandle;
 
 Router.prototype.setHandle = function (HandleConstructor) {
   this.Handle = HandleConstructor;
