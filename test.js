@@ -1,17 +1,17 @@
 'use strict';
 
-var url = require('url');
-var util = require('util');
-var http = require('http');
-var test = require('tap').test;
-var endpoint = require('endpoint');
-var drugged = require('./drugged.js');
+const url = require('url');
+const util = require('util');
+const http = require('http');
+const test = require('tap').test;
+const endpoint = require('endpoint');
+const drugged = require('./drugged.js');
 
 function request(href, method, callback) {
-  var options = url.parse(href);
-      options.method = method;
+  const options = url.parse(href);
+        options.method = method;
 
-  var req = http.request(options, function (res) {
+  const req = http.request(options, function (res) {
     res.pipe(endpoint(function (err, body) {
       callback(err, res, body.toString());
     }));
@@ -19,9 +19,9 @@ function request(href, method, callback) {
   req.end();
 }
 
-var workingRouter = new drugged.Router();
-var workingServer = http.createServer();
-    workingServer.on('request', workingRouter.dispatch.bind(workingRouter));
+const workingRouter = new drugged.Router();
+const workingServer = http.createServer();
+      workingServer.on('request', workingRouter.dispatch.bind(workingRouter));
 
 test('start working server', function (t) {
   workingServer.listen(10010, '127.0.0.1', function () {
@@ -187,12 +187,12 @@ test('using attach', function (t) {
     done(null);
   };
 
-  var called = false;
+  let called = false;
   workingRouter.attach(function () {
     called = this.custom;
   });
 
-  request('http://127.0.0.1:10010/', 'GET', function (err, res, body) {
+  request('http://127.0.0.1:10010/', 'GET', function (err, res) {
     t.equal(called, true);
     t.equal(err, null);
     t.end();
@@ -200,7 +200,7 @@ test('using attach', function (t) {
 });
 
 test('catch error on res object', function (t) {
-  Handle.prototype.something = function (done) {
+  Handle.prototype.something = function () {
     this.res.emit('error', new Error('some crazy response error'));
   };
 
@@ -213,7 +213,7 @@ test('catch error on res object', function (t) {
 });
 
 test('catch error on req object', function (t) {
-  Handle.prototype.something = function (done) {
+  Handle.prototype.something = function () {
     this.req.emit('error', new Error('some crazy request error'));
   };
 

@@ -1,4 +1,6 @@
 {
+  "root": true,
+  "extends": "eslint:recommended",
   "env": {
     "node": true,
     "es6": true
@@ -10,6 +12,9 @@
     "no-shadow": 0,
     "no-underscore-dangle": 0,
     "no-use-before-define": [1, "nofunc"],
-    "no-new-func": 0
+    "prefer-spread": 1,
+    "prefer-const": 1,
+    "no-console": 0,
+    "no-var": 1
   }
 }

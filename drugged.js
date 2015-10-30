@@ -1,13 +1,12 @@
 'use strict';
 
-var url = require('url');
-var Routes = require('routes');
+const url = require('url');
+const Routes = require('routes');
 
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // Supper simple request container
 function Handle(done, req, res, parsedUrl) {
-  var self = this;
   this.res = res;
   this.res.once('error', this.error.bind(this));
   this.req = req;
@@ -20,7 +19,6 @@ function Handle(done, req, res, parsedUrl) {
 exports.Handle = Handle;
 
 Handle.prototype.error = function (err) {
-  var self = this;
   this.res.statusCode = err.statusCode || 500;
   this.res.end(err.message);
 };
@@ -43,20 +41,20 @@ HandlerCollection.prototype.add = function (method, cb) {
 
 // Run the route method with the handle as this and params as arguments
 HandlerCollection.prototype.run = function (method, handle, params) {
-  var fn = this.all ? this.methods.all : this.methods[method];
+  let fn = this.all ? this.methods.all : this.methods[method];
   if (!fn && method === 'HEAD') fn = this.methods.GET;
 
   if (fn) {
-    var keys = Object.keys(params);
-    var args = new Array(keys.length);
-    for (var i = 0, l = keys.length; i < l; i++) {
+    const keys = Object.keys(params);
+    const args = new Array(keys.length);
+    for (let i = 0, l = keys.length; i < l; i++) {
       args[i] = params[keys[i]] === undefined ? null : params[keys[i]];
     }
 
     fn.apply(handle, args);
   } else {
-    var err = new Error('Method Not Allowed');
-        err.statusCode = 405;
+    const err = new Error('Method Not Allowed');
+          err.statusCode = 405;
     handle.error(err);
   }
 };
@@ -81,7 +79,7 @@ Router.prototype.attach = function (fn) {
 };
 
 Router.prototype.at = function (path/*, method, cb */) {
-  var method, cb;
+  let method, cb;
 
   // Intrepert arguments
   if (arguments.length < 2) {
@@ -98,8 +96,8 @@ Router.prototype.at = function (path/*, method, cb */) {
   }
 
   // If path is a RegExp convert it to a string
-  var key = path.toString();
-  var collection;
+  const key = path.toString();
+  let collection;
   if (hasOwnProperty.call(this.collections, key) === false) {
     // Create a handlers object if none exists
     collection = this.collections[key] = new HandlerCollection();
@@ -116,8 +114,8 @@ Router.prototype.at = function (path/*, method, cb */) {
   if (method) {
     collection.add(method, cb);
   } else {
-    var keys = Object.keys(cb);
-    for (var i = 0, l = keys.length; i < l; i++) {
+    const keys = Object.keys(cb);
+    for (let i = 0, l = keys.length; i < l; i++) {
       collection.add(keys[i], cb[keys[i]]);
     }
   }
@@ -135,21 +133,21 @@ Router.prototype.at = function (path/*, method, cb */) {
 
 // Create a Handle object and at last call the route method
 Router.prototype.dispatch = function (req, res) {
-  var self = this;
+  const self = this;
 
-  var parsedUrl = url.parse(req.url);
-  var match = self.router.match(parsedUrl.pathname);
+  const parsedUrl = url.parse(req.url);
+  const match = self.router.match(parsedUrl.pathname);
 
   // Create Request handle and make sure done is called in another turn
-  var sync = true;
-  var handle = new self.Handle(function (err) {
+  let sync = true;
+  const handle = new self.Handle(function (err) {
     if (sync) process.nextTick(done.bind(null, err));
     else done(err);
   }, req, res, parsedUrl);
   sync = false;
 
   function done(err) {
-    for (var i = 0, l = self.attachstack.length; i < l; i++) {
+    for (let i = 0, l = self.attachstack.length; i < l; i++) {
       self.attachstack[i].call(handle);
     }
 
