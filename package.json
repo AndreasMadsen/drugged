@@ -20,7 +20,7 @@
     "routes": "2.1.x"
   },
   "devDependencies": {
-    "tap": "2.0.x",
+    "tap": "2.x.x",
     "endpoint": "0.4.x"
   },
   "license": "MIT"

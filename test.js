@@ -199,7 +199,7 @@ test('using attach', function (t) {
   });
 });
 
-test('domain catch error on res object', function (t) {
+test('catch error on res object', function (t) {
   Handle.prototype.something = function (done) {
     this.res.emit('error', new Error('some crazy response error'));
   };
@@ -212,7 +212,7 @@ test('domain catch error on res object', function (t) {
   });
 });
 
-test('domain catch error on req object', function (t) {
+test('catch error on req object', function (t) {
   Handle.prototype.something = function (done) {
     this.req.emit('error', new Error('some crazy request error'));
   };
@@ -221,34 +221,6 @@ test('domain catch error on req object', function (t) {
     t.equal(err, null);
     t.equal(res.statusCode, 500);
     t.equal(body, 'some crazy request error');
-    t.end();
-  });
-});
-
-test('domain catch error sync object', function (t) {
-  Handle.prototype.something = function (done) {
-    throw new Error('some sync error');
-  };
-
-  request('http://127.0.0.1:10010/', 'GET', function (err, res, body) {
-    t.equal(err, null);
-    t.equal(res.statusCode, 500);
-    t.equal(body, 'some sync error');
-    t.end();
-  });
-});
-
-test('domain catch error async object', function (t) {
-  Handle.prototype.something = function (done) {
-    setTimeout(function() {
-      throw new Error('some async error');
-    });
-  };
-
-  request('http://127.0.0.1:10010/', 'GET', function (err, res, body) {
-    t.equal(err, null);
-    t.equal(res.statusCode, 500);
-    t.equal(body, 'some async error');
     t.end();
   });
 });

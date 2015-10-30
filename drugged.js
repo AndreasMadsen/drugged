@@ -2,25 +2,17 @@
 
 var url = require('url');
 var Routes = require('routes');
-var domain = require('domain');
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // Supper simple request container
-function Handle(done, req, res, parsedUrl, d) {
+function Handle(done, req, res, parsedUrl) {
   var self = this;
   this.res = res;
+  this.res.once('error', this.error.bind(this));
   this.req = req;
+  this.req.once('error', this.error.bind(this));
   this.url = parsedUrl;
-
-  // Setup domain
-  this.domain = d;
-  this.domain.add(req);
-  this.domain.add(res);
-  this.domain.on('error', function (err) {
-    err.statusCode = 500;
-    self.error(err);
-  });
 
   // If this is the actual constructor call done now
   if (this.constructor === Handle) done(null);
@@ -31,10 +23,6 @@ Handle.prototype.error = function (err) {
   var self = this;
   this.res.statusCode = err.statusCode || 500;
   this.res.end(err.message);
-
-  this.res.once('close', function () {
-    self.domain.dispose();
-  });
 };
 
 // Manage diffrent method handlers on same path
@@ -145,36 +133,33 @@ Router.prototype.at = function (path/*, method, cb */) {
     };
   });
 
-// Create a domain, then a Handle object and at last call the route method
+// Create a Handle object and at last call the route method
 Router.prototype.dispatch = function (req, res) {
   var self = this;
-  var d = domain.create();
 
-  d.run(function () {
-    var parsedUrl = url.parse(req.url);
-    var match = self.router.match(parsedUrl.pathname);
+  var parsedUrl = url.parse(req.url);
+  var match = self.router.match(parsedUrl.pathname);
 
-    // Create Request handle and make sure done is called in another turn
-    var sync = true;
-    var handle = new self.Handle(function (err) {
-      if (sync) process.nextTick(done.bind(null, err));
-      else done(err);
-    }, req, res, parsedUrl, d);
-    sync = false;
+  // Create Request handle and make sure done is called in another turn
+  var sync = true;
+  var handle = new self.Handle(function (err) {
+    if (sync) process.nextTick(done.bind(null, err));
+    else done(err);
+  }, req, res, parsedUrl);
+  sync = false;
 
-    function done(err) {
-      for (var i = 0, l = self.attachstack.length; i < l; i++) {
-        self.attachstack[i].call(handle);
-      }
-
-      if (err) return handle.error(err);
-      if (!match) {
-        err = new Error('Not Found');
-        err.statusCode = 404;
-        return handle.error(err);
-      }
-
-      match.fn(req.method, handle, match.params);
+  function done(err) {
+    for (var i = 0, l = self.attachstack.length; i < l; i++) {
+      self.attachstack[i].call(handle);
     }
-  });
+
+    if (err) return handle.error(err);
+    if (!match) {
+      err = new Error('Not Found');
+      err.statusCode = 404;
+      return handle.error(err);
+    }
+
+    match.fn(req.method, handle, match.params);
+  }
 };
